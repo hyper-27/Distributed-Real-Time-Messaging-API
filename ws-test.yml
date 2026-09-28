@@ -1,0 +1,17 @@
+config:
+  target: "ws://localhost"
+  phases:
+    - duration: 30
+      arrivalRate: 10
+      rampTo: 50
+      name: "Ramp up WebSocket clients"
+scenarios:
+  - engine: ws
+    flow:
+      - connect: "{{ target }}/?token=my-secret-token"
+      - think: 1
+      - send: '{"type":"JOIN","room":"load-test"}'
+      - loop:
+          - think: 1
+          - send: '{"type":"MESSAGE","payload":"Stress test message"}'
+        count: 5
