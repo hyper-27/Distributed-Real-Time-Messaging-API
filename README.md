@@ -10,34 +10,6 @@
 ![Status](https://img.shields.io/badge/Status-Active-brightgreen?style=flat-square)
 
 
-┌─────────────────────────────────────────────────────────────────┐
-│                         Internet Clients                        │
-│                    (WebSocket + HTTP Requests)                  │
-└────────────────────────────┬────────────────────────────────────┘
-                             │
-                    ┌────────▼─────────┐
-                    │   NGINX:80       │
-                    │ (Rate Limiter    │
-                    │  + Load Balancer)│
-                    └────────┬─────────┘
-                             │
-        ┌────────────────────┼────────────────────┐
-        │                    │                    │
-   ┌────▼─────┐         ┌────▼─────┐        ┌────▼─────┐
-   │ Node.js   │         │ Node.js   │        │ Node.js   │
-   │ Instance1 │         │ Instance2 │        │ Instance3 │
-   │  :3000    │         │  :3000    │        │  :3000    │
-   └────┬─────┘         └────┬─────┘        └────┬─────┘
-        │                    │                    │
-        └────────────────────┼────────────────────┘
-                             │
-                ┌────────────┴────────────┐
-                │                         │
-           ┌────▼─────────┐        ┌─────▼──────┐
-           │ Redis:6379   │        │PostgreSQL  │
-           │ (Pub/Sub &   │        │  :5432     │
-           │  Cache)      │        │(Persistence)|
-           └──────────────┘        └────────────┘
 
 A high-performance, containerized microservices backend for real-time WebSocket messaging. Built with Node.js, Redis, PostgreSQL, NGINX, and Docker to support distributed, scalable communication systems.
 
