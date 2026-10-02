@@ -134,3 +134,120 @@ docker-compose up --build
 # 3. Access the application
 # API: http://localhost
 # Logs: docker-compose logs -f chat-app
+
+chat-app_1   | Server listening on port 3000
+nginx_1      | listening on port 80
+postgres_1   | ready to accept connections
+redis_1      | Ready to accept connections
+
+### Project Structure
+
+node-docker-microservice/
+│
+├── 📄 server.js                      # Entry point - initializes HTTP server, WebSocket, databases
+├── 📄 package.json                   # Node.js dependencies
+├── 🐳 Dockerfile                     # Alpine Node.js 18 container image
+├── 🔧 docker-compose.yml             # Multi-service orchestration (3x Node, Redis, Postgres, NGINX)
+├── 🌐 nginx.conf                     # Load balancer, reverse proxy, rate limiting config
+├── 📋 .dockerignore                  # Docker build exclusions
+├── 📋 .gitignore                     # Git exclusions
+│
+├── 📊 load-test.yml                  # Artillery HTTP load test config
+├── 📊 ws-test.yml                    # Artillery WebSocket stress test config
+│
+└── src/                              # Application source code
+    ├── app.js                        # Express application setup
+    ├── 📁 repositories/              # Database access layer (Data Mapper pattern)
+    │   └── message.repository.js     # Message CRUD operations
+    ├── 📁 services/                  # Business logic & integrations
+    │   └── redis.service.js          # Redis connection & Pub/Sub
+    ├── 📁 websockets/                # WebSocket handlers
+    │   └── chat.socket.js            # Chat connection & message handling
+    └── 📁 routes/                    # HTTP API endpoints
+        └── messages.routes.js        # Message API endpoints
+
+
+Data Flow
+Client Connection: WebSocket client connects to NGINX (port 80)
+Request Routing: NGINX routes request to an available Node.js instance
+Message Publishing: Client sends a message via WebSocket
+Redis Broadcast: App instance publishes message to Redis Pub/Sub
+Cross-Instance Delivery: Other instances receive message from Redis
+Database Persistence: Message is stored in PostgreSQL
+Client Notification: All connected clients receive message in real-time
+
+### Installation & Setup
+# Verify installed versions
+docker --version      # Docker 20.10+
+docker-compose --version  # Docker Compose 1.29+
+node --version        # Node.js 18+ (for local development)
+npm --version         # npm 8+
+
+
+# Clone repository
+git clone https://github.com/hyper-27/node-docker-microservice.git
+cd node-docker-microservice
+
+# Build and start services
+docker-compose up --build
+
+# In another terminal, verify services
+docker-compose ps
+docker-compose logs -f
+
+# Stop services
+docker-compose down
+
+# Stop and remove volumes (clean slate)
+docker-compose down -v
+
+# Server Configuration
+PORT=3000
+NODE_ENV=production
+
+# PostgreSQL Configuration
+POSTGRES_USER=postgres
+POSTGRES_PASSWORD=secret          # CHANGE IN PRODUCTION!
+POSTGRES_DB=messaging
+POSTGRES_HOST=postgres
+POSTGRES_PORT=5432
+
+# Redis Configuration
+REDIS_HOST=redis
+REDIS_PORT=6379
+
+# NGINX Configuration
+NGINX_WORKERS=auto
+RATE_LIMIT_ZONE=10m
+RATE_LIMIT_PER_SECOND=10
+RATE_LIMIT_BURST=20
+
+##Scaling Replicas
+chat-app:
+  build: .
+  restart: on-failure
+  depends_on:
+    - postgres
+    - redis
+  deploy:
+    replicas: 5  # Increased from 3 to 5 instances
+
+##Contributing
+
+git clone https://github.com/YOUR-USERNAME/node-docker-microservice.git
+cd node-docker-microservice
+git checkout -b feature/your-feature-name
+
+# Create a feature branch
+git checkout -b feature/amazing-feature
+
+# Make your changes
+# Test locally
+npm test
+docker-compose up --build
+
+# Commit with clear message
+git commit -m "Add: description of changes"
+
+git push origin feature/amazing-feature
+# Create Pull Request on GitHub
